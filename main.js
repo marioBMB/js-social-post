@@ -57,14 +57,32 @@ const posts = [
 ];
 
 const postsContainer = document.getElementsByClassName("posts-list")[0];
-
-
-
-console.log(getTimeMeta("2021-03-05"));
-// formatDateStr("2021-03-05");
-
+const likeBtns = document.getElementsByClassName("like-button");
+console.log(likeBtns);
 
 renderPosts();
+
+
+for(let i=0; i < likeBtns.length; i++){
+
+    likeBtns[i].addEventListener("click", function(e){
+        e.preventDefault();
+        toggleLike(this);
+    });
+}
+
+
+function toggleLike(element){
+
+    const id = element.getAttribute("data-postid");
+    const likeCounter = document.querySelector("#like-counter-"+id);
+    let likes = likeCounter.textContent;
+    element.classList.toggle("like-button--liked");
+
+    element.classList.contains("like-button--liked")? likes++ : likes--;
+    likeCounter.textContent = likes;
+}
+
 
 
 
@@ -100,7 +118,7 @@ function getPosts(){
                 <div class="post__footer">
                     <div class="likes js-likes">
                         <div class="likes__cta">
-                            <a class="like-button  js-like-button" href="#" data-postid="${posts[i].id}">
+                            <a class="like-button js-like-button" href="#" data-postid="${posts[i].id}">
                                 <i class="like-button__icon fas fa-thumbs-up" aria-hidden="true"></i>
                                 <span class="like-button__label">Mi Piace</span>
                             </a>
@@ -116,8 +134,6 @@ function getPosts(){
     }
     return postsHTML;
 }
-
-
 
 function formatDateObj(DateTime, langLocale = [], formatParamsObj){
     return DateTime.toLocaleDateString(langLocale, formatParamsObj);
