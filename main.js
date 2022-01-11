@@ -56,41 +56,26 @@ const posts = [
     }
 ];
 
-const postsContainer = document.getElementsByClassName("posts-list")[0];
-const likeBtns = document.getElementsByClassName("like-button");
-console.log(likeBtns);
-
-renderPosts();
+window.addEventListener("DOMContentLoaded", main());
 
 
-for(let i=0; i < likeBtns.length; i++){
+function main(){
 
-    likeBtns[i].addEventListener("click", function(e){
-        e.preventDefault();
-        toggleLike(this);
-    });
+    const postsContainer = document.getElementsByClassName("posts-list")[0];
+    const likeBtns = document.getElementsByClassName("like-button");
+    
+    renderPosts(postsContainer);
+    
+    for(let i=0; i < likeBtns.length; i++){
+        
+        likeBtns[i].addEventListener("click", function(e){
+            e.preventDefault();
+            toggleLike(this);
+        });
+    }
 }
 
 
-function toggleLike(element){
-
-    const id = element.getAttribute("data-postid");
-    const likeCounter = document.querySelector("#like-counter-"+id);
-    let likes = likeCounter.textContent;
-    element.classList.toggle("like-button--liked");
-
-    element.classList.contains("like-button--liked")? likes++ : likes--;
-    likeCounter.textContent = likes;
-}
-
-
-
-
-
-function renderPosts(){
-
-    postsContainer.innerHTML = getPosts();
-}
 
 function getPosts(){
 
@@ -98,16 +83,21 @@ function getPosts(){
     
     for (let i=0; i < posts.length; i++){
 
+        const urlPlaceholder = posts[i].author.image ?? "#";
+        const altText = posts[i].author.image == null? "" : posts[i].author.name;
+
         const thisPostHTML = `
             <div class="post">
                 <div class="post__header">
-                    <div class="post-meta">                    
-                        <div class="post-meta__icon">
-                            <img class="profile-pic" src="${posts[i].author.image}" alt="${posts[i].author.name}">                    
+                    <div class="post-meta">
+                    
+                        <div class="post-meta__icon ${toggleDefaultPic(posts[i].author.image)}">
+                            <img class="profile-pic" src="${urlPlaceholder}" alt="${altText}">                    
+                            ${toggleDefaultPicSpan(posts[i].author.image, posts[i].author.name)}
                         </div>
                         <div class="post-meta__data">
                             <div class="post-meta__author">${posts[i].author.name}</div>
-                            <div class="post-meta__time" tooltip-name="${formatDateStr(posts[i].created)}">${getTimeMeta(posts[i].created)}</div>
+                            <div class="post-meta__time" title="${posts[i].created}">${getTimeMeta(posts[i].created)}</div>
                         </div>                    
                     </div>
                 </div>
@@ -135,16 +125,51 @@ function getPosts(){
     return postsHTML;
 }
 
-function formatDateObj(DateTime, langLocale = [], formatParamsObj){
+function toggleDefaultPic(imageUrl){
+
+    if (imageUrl == null){
+        return "profile-pic-default";
+    }
+    return "";
+}
+
+function toggleDefaultPicSpan(imageUrl, author){
+
+    [authorName, authorSurname] = author.split(" ");
+    nameInitial = authorName[0].toUpperCase();
+    surnameInitial = authorSurname[0].toUpperCase();
+
+    if (imageUrl == null){
+        return `<span>${nameInitial} ${surnameInitial}</span>`;
+    }
+    return "";
+}
+
+function renderPosts(postsContainer){
+    postsContainer.innerHTML = getPosts();
+}
+
+function toggleLike(element){
+
+    const id = element.getAttribute("data-postid");
+    const likeCounter = document.querySelector("#like-counter-"+id);
+    let likes = likeCounter.textContent;
+    element.classList.toggle("like-button--liked");
+
+    element.classList.contains("like-button--liked")? likes++ : likes--;
+    likeCounter.textContent = likes;
+}
+
+function formatDateObj(DateTime, langLocale = [], formatParamsObj=[]){
     return DateTime.toLocaleDateString(langLocale, formatParamsObj);
 }
 
-function formatDateStr(dateTimeStr, langLocale = [], formatParamsObj){
+function formatDateStr(dateTimeStr, langLocale = [], formatParamsObj=[]){
     let DateTime = new Date(dateTimeStr);
     formatDateObj(DateTime, langLocale, formatParamsObj);
 }
 
-function getTimeMeta(dateTimeStr, langLocale='it-IT'){
+function getTimeMeta(dateTimeStr){
 
     let Now = new Date();
     const DateTime = new Date(dateTimeStr);
